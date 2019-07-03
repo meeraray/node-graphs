@@ -1,0 +1,52 @@
+.control {
+    border:1px solid purple;
+    padding:5px;
+   margin-bottom:10px;
+    cursor: default;
+}
+.control:hover {
+    background-color:lavender;
+}
+.control span {
+    margin-left:5px;
+}
+.control.selected {
+    background-color:#f3a5f3;
+}
+.control.selected:hover {
+    background-color:#f3a5f3;
+}
+
+.node {
+    position:absolute;
+    display:table-cell;
+    background-color:lavender;
+    width:30px;
+    height:30px;
+    border-radius:50%;
+/*    line-height:30px;*/
+    text-align:center;
+    vertical-align: middle;
+}
+
+#stage {
+    height:600px;
+    padding-left:0px;
+    border: 1px solid purple;
+}
+
+.container-fluid.custom {
+    margin: 50px 0px;
+}
+
+#sidebar {
+    padding:0px 15px;
+}
+#sidebar .inner {
+    border: 1px solid black;
+    height:100%;
+    padding: 10px;
+}
+#message {
+    font-style: italic;
+}
