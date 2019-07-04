@@ -11,10 +11,10 @@
     margin-left:5px;
 }
 .control.selected {
-    background-color:#f3a5f3;
+    background-color:#8585ad;
 }
 .control.selected:hover {
-    background-color:#f3a5f3;
+    background-color:#666699;
 }
 
 .node {
@@ -27,6 +27,7 @@
 /*    line-height:30px;*/
     text-align:center;
     vertical-align: middle;
+    cursor: default;
 }
 
 #stage {
