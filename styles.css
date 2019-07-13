@@ -30,12 +30,15 @@
     vertical-align: middle;
     cursor: default;
     user-select:none;
+    z-index:2;
 }
 
 #stage {
     height:600px;
     padding-left:0px;
+    padding-right:0px;
     border: 1px solid purple;
+    position:relative;
 }
 
 .container-fluid.custom {
@@ -52,4 +55,18 @@
 }
 #message {
     font-style: italic;
+}
+
+line {
+    stroke: black;
+    stroke-width:2;
+}
+#tempLine {
+    display:none;
+}
+.line {
+    height:2px;
+    background-color:purple;
+    position:absolute;
+    z-index:1;
 }
