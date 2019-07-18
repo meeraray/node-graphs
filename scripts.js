@@ -28,21 +28,15 @@ var nodeHeld = null;
 
 var stage_width;
 
+var dragHandler;
+var nodeMoving = null;
+
 $(function() {
     
     stage_width = $("#stage").width();
     
     /* updates width of stage and position of nodes when window resized
     scales node's position by % of container, but keeps it in boundaries */
-    function resizedw(){
-    // Haven't resized in 100ms!
-}
-
-var doit;
-window.onresize = function(){
-  clearTimeout(doit);
-  doit = setTimeout(resizedw, 100);
-};
     
     var timer;
     $(window).resize(function() {
@@ -65,6 +59,10 @@ window.onresize = function(){
             $("#tempLine").css("top", 0)
             $("#tempLine").css("left", 0);
             $("#tempLine").css("width", 0);
+        }
+        if(selected == MOVE_NODE) {
+            //to wipe out data from last time
+            nodeMoving = null;
         }
     });
     
@@ -89,10 +87,13 @@ window.onresize = function(){
         if(selected == NEW_LINE) {
             $("#tempLine").hide();
         }
+        if(selected == MOVE_NODE) {
+            nodeMoving = null;
+        }
     });
     
-    //update position of line when mouse moves
     $("#stage").mousemove(function(e) {
+        //update position of line when mouse moves
         if(selected == NEW_LINE && nodeHeld != null) {
             var pos = getXandY(e);
 //            console.log(pos.x + " " + pos.y);
@@ -106,6 +107,17 @@ window.onresize = function(){
             $("#tempLine").css("width", line.css("width"));
             $("#tempLine").css("transform", line.css("transform"));
         }
+        //update position of node when mouse moves
+        if(selected == MOVE_NODE && nodeMoving != null) {
+            
+            var pos = getXandY(e);
+            var processedCoords = pointerToLT(pos.x, pos.y);
+            nodeMoving.css("left", processedCoords.left);
+            nodeMoving.css("top", processedCoords.top);
+            updateLinesFromNodes();
+            //console.log(processedCoords.left + " " + processedCoords.top);
+        }
+        
     })
     
     $("#stage").on("click", ".node", function(e) {
@@ -115,6 +127,31 @@ window.onresize = function(){
         }
         if(selected == NEW_LINE) {
             handleAddLine($(this));
+        }
+    });
+    
+    $("#stage").on("click", ".line", function(e) {
+        if(selected == DELETE_LINE) {
+            handleDeleteLine($(this));
+        } 
+    });
+    
+    $("#stage").on("mousedown", ".node", function(e) {
+        if(selected == MOVE_NODE) {
+            nodeMoving = $(this);
+        }    
+    });
+    
+    $("#stage").mouseup(function(e) {
+        //handle end of node moving
+        if(selected == MOVE_NODE && nodeMoving != null) {
+            handleMoveNodeMouseUp(e);
+        }
+    });
+    
+    $("#stage").on("mouseup", ".node", function(e) {
+        if(selected == MOVE_NODE && nodeMoving != null) {
+            handleMoveNodeMouseUp(e);
         }
     });
     
@@ -160,15 +197,40 @@ window.onresize = function(){
     }
     
     function endresize() {
-        console.log("resize over"); 
+        //console.log("resize over"); 
         var prev = stage_width;
         stage_width = $("#stage").width();
-        $(".node").each(function() {
-            var left = Math.round(parseInt($(this).css("left")) / prev * stage_width);
+        for(ind = 0; ind < nodes.length; ind++) {
+            var node = nodes[ind];
+            var left = Math.round(node.x * stage_width);
             var max = Math.round(stage_width - CIRCLE_WIDTH);
-            $(this).css("left", Math.min(left, max));
-        });
+            node.elem.css("left", Math.min(left, max));
+        }
         updateLinesFromNodes();
+    }
+    
+    //convert mouse pointer coords to left and top css properties of node
+    function pointerToLT(xCoord, yCoord) {
+        xCoord = Math.max(CIRCLE_WIDTH / 2, xCoord);
+        xCoord = Math.min(xCoord, $("#stage").width() - CIRCLE_WIDTH / 2);
+        yCoord = Math.max(yCoord, CIRCLE_WIDTH / 2);
+        yCoord = Math.min(yCoord, $("#stage").height() - CIRCLE_WIDTH / 2);
+        xCoord -= CIRCLE_WIDTH / 2;
+        yCoord -= CIRCLE_WIDTH / 2;
+        xCoord = Math.round(xCoord);
+        yCoord = Math.round(yCoord);
+        return {left: xCoord, top:yCoord};
+    }
+    
+    function updateNodeX(nodeElem) {
+        for(i = 0; i < nodes.length; i++) {
+            var node = nodes[i];
+            if(node.elem.is(nodeElem)) {
+                console.log("changing internals");
+                node.x = parseInt(nodeElem.css("left")) / $("#stage").width();
+                return;
+            }
+        }
     }
     
     function handleAddNode(xCoord, yCoord) {
@@ -180,7 +242,7 @@ window.onresize = function(){
         
         //create node DOM element and associated node object in list
         var circle = $("<div></div>").addClass("node");
-        var node = {elem:circle};
+        var node = {elem:circle, x:(xCoord / $("#stage").width())};
         nodes.push(node);
         xCoord -= CIRCLE_WIDTH / 2;
         yCoord -= CIRCLE_WIDTH / 2;
@@ -231,4 +293,24 @@ window.onresize = function(){
         nodeHeld = null; 
     }
     
+    function handleDeleteLine(line) {
+        for(ind = 0; ind < edges.length; ind++) {
+            if(edges[ind].nodeline.is(line)) {
+                edges.splice(ind, 1);
+                line.remove();
+                return;
+            }
+        }
+    }
+    
+    //place node at final position and update node list with position
+    function handleMoveNodeMouseUp(e) {
+        console.log("mouse up");
+        var pos = getXandY(e);
+        var processedCoords = pointerToLT(pos.x, pos.y);
+        nodeMoving.css("left", processedCoords.left);            
+        nodeMoving.css("top", processedCoords.top);
+        updateNodeX(nodeMoving);
+        nodeMoving = null;
+    }
 });	
