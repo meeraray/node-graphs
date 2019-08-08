@@ -3,7 +3,6 @@ var CIRCLE_WIDTH = 30;
 var LINE_HEIGHT = 2;
 
 var nodes = [];
-var seen = [];
 var edges = [];
 
 //explanatory messages shown when control button clicked
@@ -31,7 +30,9 @@ var stage_width;
 var dragHandler;
 var nodeMoving = null;
 
+
 $(function() {
+    
     
     stage_width = $("#stage").width();
     
@@ -177,12 +178,12 @@ $(function() {
             angle *= -1;
         }
 //        console.log(angle);
-        line.css("transform", "rotate(" + Math.round(angle) + "deg)");
+        line.css("transform", "rotate(" + /*Math.round(*/angle/*)*/ + "deg)");
         return line;
     }
     
     function updateLinesFromNodes() {
-        for(ind = 0; ind < edges.length; ind++) {
+        for(var ind = 0; ind < edges.length; ind++) {
             var edge = edges[ind];
             var a = edge.a;
             var b = edge.b;
@@ -200,7 +201,7 @@ $(function() {
         //console.log("resize over"); 
         var prev = stage_width;
         stage_width = $("#stage").width();
-        for(ind = 0; ind < nodes.length; ind++) {
+        for(var ind = 0; ind < nodes.length; ind++) {
             var node = nodes[ind];
             var left = Math.round(node.x * stage_width);
             var max = Math.round(stage_width - CIRCLE_WIDTH);
@@ -223,10 +224,10 @@ $(function() {
     }
     
     function updateNodeX(nodeElem) {
-        for(i = 0; i < nodes.length; i++) {
+        for(var i = 0; i < nodes.length; i++) {
             var node = nodes[i];
             if(node.elem.is(nodeElem)) {
-                console.log("changing internals");
+//                console.log("changing internals");
                 node.x = parseInt(nodeElem.css("left")) / $("#stage").width();
                 return;
             }
@@ -255,7 +256,7 @@ $(function() {
 
     function handleDeleteNode(node) {
         //delete associated edges
-        for(ind = 0; ind < edges.length; ind++) {
+        for(var ind = 0; ind < edges.length; ind++) {
             var edge = edges[ind];
             if(edge.a.is(node) || edge.b.is(node)) {
                 console.log(edge);
@@ -294,7 +295,7 @@ $(function() {
     }
     
     function handleDeleteLine(line) {
-        for(ind = 0; ind < edges.length; ind++) {
+        for(var ind = 0; ind < edges.length; ind++) {
             if(edges[ind].nodeline.is(line)) {
                 edges.splice(ind, 1);
                 line.remove();
@@ -305,12 +306,14 @@ $(function() {
     
     //place node at final position and update node list with position
     function handleMoveNodeMouseUp(e) {
-        console.log("mouse up");
+//        console.log("mouse up");
         var pos = getXandY(e);
         var processedCoords = pointerToLT(pos.x, pos.y);
         nodeMoving.css("left", processedCoords.left);            
         nodeMoving.css("top", processedCoords.top);
         updateNodeX(nodeMoving);
+        updateLinesFromNodes();
         nodeMoving = null;
     }
+    
 });	
