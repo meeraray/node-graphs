@@ -65,6 +65,9 @@ function nextUnvisitedNeighbor(vertex, vertices, adjacencyMatrix) {
 //takes two numbers
 function shortestPath(startVertex, endVertex) {
     //setup
+//    startVertex = labelToNodeNum(startVertex);
+//    endVertex = labelToNodeNum(endVertex);
+    var result = {process:[], length:null};
     var vertices = nodes;
     for(var ind = 0; ind < vertices.length; ind++) {
         var vertex = vertices[ind];
@@ -91,6 +94,8 @@ function shortestPath(startVertex, endVertex) {
     while(!done && unvisitedVertices.length != 0) {
         var frontVertex = unvisitedVertices[0];
         unvisitedVertices.shift();
+        var processEntry = [frontVertex.name, []];
+        console.log("removed vertice " + frontVertex.name + " adding vertices: ");
         while(!done && nextUnvisitedNeighbor(frontVertex, vertices, adjacencyMatrix) != null) {
             var nextNeighbor = nextUnvisitedNeighbor(frontVertex, vertices, adjacencyMatrix);
             if(nextNeighbor.visited == false) {
@@ -98,12 +103,22 @@ function shortestPath(startVertex, endVertex) {
                 nextNeighbor.length = 1 + frontVertex.length;
                 nextNeighbor.prevVertex = frontVertex;
                 unvisitedVertices.push(nextNeighbor);
+                processEntry[1].push(nextNeighbor.name);
+                console.log(nextNeighbor.name);
             }
             if(nextNeighbor.name == endVertex.name) {
+                console.log("added vertice " + endVertex.name + ", search over");
                 done = true;
             }
         }
+        result.process.push(processEntry);
     }
+    result.length = endVertex.length;
     console.log("Path Length: " + endVertex.length);
     console.log(vertices);
+    console.log(result);
+    
+    //print array
+    
+    return result;
 }

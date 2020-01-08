@@ -30,6 +30,8 @@ var stage_width;
 var dragHandler;
 var nodeMoving = null;
 
+var deleted = [];
+
 
 $(function() {
     
@@ -38,7 +40,6 @@ $(function() {
     
     /* updates width of stage and position of nodes when window resized
     scales node's position by % of container, but keeps it in boundaries */
-    
     var timer;
     $(window).resize(function() {
         clearTimeout(timer);
@@ -156,6 +157,11 @@ $(function() {
         }
     });
     
+    $("#shortest-path-button").click(function() {
+       console.log("btn clicked!"); 
+        handleShortestPathBtnClicked();
+    });
+    
     /*x and y position of mouse relative to #stage
     only call if mouse over #stage */
     function getXandY(event) {
@@ -234,6 +240,68 @@ $(function() {
         }
     }
     
+    function nodeNumToLabel(nodeNum) {
+        return $(".node").eq(nodeNum).text();
+    }
+    
+    function labelToNodeNum(label) {
+        var returnVal;
+        $(".node").each(function(ind) {
+            if($(this).text() == label) {
+                console.log(ind);
+                returnVal = ind;
+            }
+        });
+        return returnVal;
+    }
+    
+    function genDisplay(processArray) {
+        console.log(processArray);
+        var ind = 0;
+        var ind2 = 0;
+        var interval = setInterval(function() {
+            if(ind2 >= processArray[ind][1].length) {
+                $(".node").removeClass("visiting");
+                $(".node").eq(processArray[ind][0]).addClass("visited");
+                ind++;
+                ind2 = 0;
+            }
+            if(ind >= processArray.length) {
+                clearInterval(interval);
+            }
+            console.log(ind, ind2);
+            $(".node").removeClass("on");
+            var node = $(".node").eq(processArray[ind][0]);
+            var nodeVisiting = $(".node").eq(processArray[ind][1][ind2]);
+            nodeVisiting.addClass("visiting");
+            node.addClass("on");
+            ind2++;
+        }, 1000);
+    }
+    
+    function printToSidebar(txt) {
+        $("#log").append("<p>" + txt + "</p>");
+    }
+    
+    function callShortestPath(nodeNum1, nodeNum2) {
+        var nodeNum1 = labelToNodeNum(nodeNum1);
+        var nodeNum2 = labelToNodeNum(nodeNum2);
+        console.log(nodeNum1, nodeNum2);
+        var result = shortestPath(nodeNum1, nodeNum2);
+        genDisplay(result.process);
+        
+        printToSidebar("Length: " + result.length);
+        
+        //Print out path
+        var vertlist = [];
+        var vert = result[result.length - 1][0];
+        while(vert.prevVertex != null) {
+            vertlist.push(vert);
+            vert = vert.prevVertex;
+        }
+        console.log(vertlist);
+    }
+    
     function handleAddNode(xCoord, yCoord) {
         //place node inside stage boundaries
         xCoord = Math.max(CIRCLE_WIDTH / 2, xCoord);
@@ -249,9 +317,14 @@ $(function() {
         yCoord -= CIRCLE_WIDTH / 2;
         circle.css("left", Math.round(xCoord));
         circle.css("top", Math.round(yCoord));
-        circle.html(nodes.length - 1);
+        if(deleted.length != 0) {
+            circle.html(deleted.shift());
+        }
+        else {
+            circle.html(nodes.length - 1);
+        }
         $("#stage").append(circle);
-       
+        updateSelectBox();
     }
 
     function handleDeleteNode(node) {
@@ -266,10 +339,13 @@ $(function() {
                 ind--;
             }
         }
+        deleted.push(node.text());
+        deleted.sort();
         var index = $(".node").index(node);
         console.log(index);
         nodes.splice(index, 1);
-        node.remove()
+        node.remove();
+        updateSelectBox();
     }
     
     function handleAddLine(node) {
@@ -316,4 +392,26 @@ $(function() {
         nodeMoving = null;
     }
     
+    function updateSelectBox() {
+        $(".shortest-path .form-control").empty();
+        var options = [];
+        for(var ind = 0; ind < nodes.length; ind++) {
+            options.push($(".node").eq(ind).text());
+        }
+        options.sort();
+        for(var ind = 0; ind < options.length; ind++) {
+            $(".shortest-path .form-control").append("<option>" + options[ind] + "</option>");   
+        }
+    }
+    
+    function handleShortestPathBtnClicked() {
+        var nodeNum1 = parseInt($("#node1 option:selected").text());
+        var nodeNum2 = parseInt($("#node2 option:selected").text());
+        if(nodeNum1 != nodeNum2) {
+            callShortestPath(nodeNum1, nodeNum2);
+        }
+        $(".node").removeClass("on");
+        $(".node").removeClass("visited");
+        $(".node").removeClass("visiting");
+    }
 });	

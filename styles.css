@@ -49,7 +49,7 @@
     padding:0px 15px;
 }
 #sidebar .inner {
-    border: 1px solid black;
+    border: 1px solid purple;
     height:100%;
     padding: 10px;
 }
@@ -69,4 +69,22 @@ line {
     background-color:purple;
     position:absolute;
     z-index:1;
+}
+
+#controlbar, #stage, #sidebar {
+    margin-bottom:15px;
+}
+#shortest-path-heading {
+    margin-top:50px;
+    font-weight: bold;
+}
+.on {
+/*    background-color:purple;*/
+    
+}
+.visiting {
+    border:2px solid purple;
+}
+.visited {
+    background-color: purple;
 }
